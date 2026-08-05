@@ -52,7 +52,7 @@ jobs:
 
       # Block the pipeline on fixable CRITICAL vulnerabilities.
       - name: Trivy scan — fail on CRITICAL
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: test-backend:${{ steps.meta.outputs.tag }}
           severity: CRITICAL
@@ -62,7 +62,7 @@ jobs:
 
       # Report HIGH findings for visibility without failing the build.
       - name: Trivy scan — report HIGH (non-blocking)
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: test-backend:${{ steps.meta.outputs.tag }}
           severity: HIGH
