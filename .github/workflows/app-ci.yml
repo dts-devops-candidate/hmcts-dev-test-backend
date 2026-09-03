@@ -1,11 +1,28 @@
-name: CI
+name: Application CI
 
-# Feature branches are gated through their pull request; main additionally runs
-# on merge and is the only branch that produces the `latest` image tag.
+# Runs only when application code or its packaging changes.
+# Feature branches are gated through their pull request; main also runs on merge
+# and is the only branch that produces the `latest` image tag.
 on:
   push:
     branches: [main]
+    paths:
+      - 'src/**'
+      - 'build.gradle'
+      - 'gradle/**'
+      - 'gradlew'
+      - 'Dockerfile'
+      - '.dockerignore'
+      - '.github/workflows/app-ci.yml'
   pull_request:
+    paths:
+      - 'src/**'
+      - 'build.gradle'
+      - 'gradle/**'
+      - 'gradlew'
+      - 'Dockerfile'
+      - '.dockerignore'
+      - '.github/workflows/app-ci.yml'
 
 permissions:
   contents: read
@@ -69,20 +86,3 @@ jobs:
           exit-code: '0'
           ignore-unfixed: true
           format: table
-
-  terraform:
-    name: Terraform fmt & validate
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: terraform
-    steps:
-      - uses: actions/checkout@v4
-      - uses: hashicorp/setup-terraform@v3
-      - name: Format check
-        run: terraform fmt -check -recursive
-      # -backend=false validates without remote state or cloud credentials.
-      - name: Validate
-        run: |
-          terraform init -backend=false
-          terraform validate

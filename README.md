@@ -29,14 +29,26 @@ Stop the stack with `docker compose down`.
 
 ## CI/CD pipeline
 
-One workflow, [.github/workflows/ci.yml](.github/workflows/ci.yml), runs on pull
-requests and on pushes to `main`. Feature branches are gated through their PR;
-`main` runs on merge and is the only branch that produces the `latest` image tag.
+The application and infrastructure pipelines are separated, since they change
+independently and use different tooling. Both run on pull requests and on pushes
+to `main`, and each uses path filters so it only runs when its own files change.
+Feature branches are gated through their PR; `main` runs on merge and is the only
+branch that produces the `latest` image tag.
+
+**Application CI** — [.github/workflows/app-ci.yml](.github/workflows/app-ci.yml),
+triggered by changes under `src/`, `build.gradle`, the Gradle wrapper, or the
+`Dockerfile`:
 
 | Stage | What it does | What it blocks on |
 |-------|--------------|-------------------|
 | Build, test & Checkstyle | `./gradlew build` — compiles, runs unit + integration tests, and runs Checkstyle (via the `uk.gov.hmcts.java` plugin) | Any compile error, test failure, or Checkstyle violation |
 | Image build & Trivy scan | Builds the Docker image tagged with the short git SHA (and `latest` on `main`), then scans it | A **fixable CRITICAL** vulnerability fails the job; **HIGH** findings are reported but do not fail |
+
+**Infrastructure CI** — [.github/workflows/infra-ci.yml](.github/workflows/infra-ci.yml),
+triggered by changes under `terraform/`:
+
+| Stage | What it does | What it blocks on |
+|-------|--------------|-------------------|
 | Terraform fmt & validate | `terraform fmt -check` and `terraform validate` against `terraform/` | Unformatted or invalid Terraform |
 
 **Image tagging.** Every image is tagged with the short commit SHA, giving an
